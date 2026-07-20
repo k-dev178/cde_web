@@ -14,6 +14,41 @@ checkin_set: set[str] = set()
 BASE_URL = "https://cde.jj.ac.kr/_custom/jj/_common/app/room-reservation/logic/ajax.jsp"
 WEEKDAY_KO = ["월", "화", "수", "목", "금", "토", "일"]
 
+STUDIO_SUMMARY_LABELS = [
+    "셀프(1인)스튜디오 1, 2호실(학생회관 238호)",
+    "셀프(1인)스튜디오 3, 4호실(교수연구동 9층)",
+    "MOOC 스튜디오",
+    "하이브리드 스튜디오",
+    "화상회의실(HATCH 스튜디오)",
+    "HATCH 스튜디오(블랙 스튜디오)",
+]
+
+
+def _studio_summary(day_data: dict[int, list]) -> tuple[int, dict[str, int]]:
+    """월 예약 전체 건수와 출력용 스튜디오 유형별 건수를 반환한다."""
+    counts = {label: 0 for label in STUDIO_SUMMARY_LABELS}
+    total = 0
+
+    for items in day_data.values():
+        for item in items:
+            total += 1
+            name = "".join(str(item.get("rpName", "")).lower().split())
+
+            if "셀프" in name and ("교수연구동" in name or "3,4호실" in name):
+                counts[STUDIO_SUMMARY_LABELS[1]] += 1
+            elif "셀프" in name and ("학생회관" in name or "1,2호실" in name):
+                counts[STUDIO_SUMMARY_LABELS[0]] += 1
+            elif "mooc" in name:
+                counts[STUDIO_SUMMARY_LABELS[2]] += 1
+            elif "하이브리드" in name:
+                counts[STUDIO_SUMMARY_LABELS[3]] += 1
+            elif "화상회의실" in name:
+                counts[STUDIO_SUMMARY_LABELS[4]] += 1
+            elif "블랙" in name or "hatch스튜디오" in name:
+                counts[STUDIO_SUMMARY_LABELS[5]] += 1
+
+    return total, counts
+
 
 def _fetch(d: str) -> list | None:
     try:
@@ -74,7 +109,12 @@ def _fetch_month(y: int, m: int) -> dict[int, list]:
             day = futures[future]
             items = future.result()
             if items:
-                day_data[day] = sorted(items, key=lambda x: x.get("rrStartTime", ""))
+                confirmed_items = [item for item in items if item.get("rrState") == "예약완료"]
+                if confirmed_items:
+                    day_data[day] = sorted(
+                        confirmed_items,
+                        key=lambda x: x.get("rrStartTime", ""),
+                    )
     return day_data
 
 
@@ -154,6 +194,21 @@ async def export_excel(year: int | None = None, month: int | None = None):
 
     if cur == 1:
         ws.cell(row=1, column=1, value=f"{y}년 {m}월 예약 내역 없음")
+        cur = 3
+
+    # 월별 스튜디오·기자재 대여 요약
+    total, summary_counts = _studio_summary(day_data)
+    ws.merge_cells(start_row=cur, start_column=1, end_row=cur, end_column=3)
+    cell = ws.cell(row=cur, column=1, value=f"• {m}월 스튜디오·기자재 대여 요약(총 {total}건)")
+    cell.font = Font(bold=True, size=11)
+    cell.alignment = Alignment(horizontal="left", vertical="center")
+    cur += 1
+
+    for label in STUDIO_SUMMARY_LABELS:
+        ws.merge_cells(start_row=cur, start_column=1, end_row=cur, end_column=3)
+        cell = ws.cell(row=cur, column=1, value=f" - {label}: {summary_counts[label]}건")
+        cell.alignment = Alignment(horizontal="left", vertical="center", indent=1)
+        cur += 1
 
     buf = io.BytesIO()
     wb.save(buf)
