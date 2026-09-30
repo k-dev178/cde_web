@@ -1,0 +1,41 @@
+<dialog id="export-dialog" class="export-dialog glass-surface" aria-labelledby="export-dialog-title" aria-describedby="export-dialog-description">
+  <div class="export-dialog__header">
+    <div>
+      <p class="export-dialog__eyebrow">EXPORT</p>
+      <h2 id="export-dialog-title" class="export-dialog__title">예약 내역 추출</h2>
+    </div>
+    <button type="button" class="export-dialog__close" data-dialog-close aria-label="추출 창 닫기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </svg>
+    </button>
+  </div>
+
+  <p id="export-dialog-description" class="export-dialog__description">
+    예약완료된 스튜디오 대여 내역을 파일로 저장합니다.
+  </p>
+
+  <section class="export-dialog__period" aria-label="추출 기간 선택">
+    <h3 class="export-dialog__section-title">추출할 기간</h3>
+    <p class="export-dialog__hint">월 전체를 선택하거나, 기간 지정을 체크해 시작일과 종료일을 선택하세요.</p>
+    {% include "components/_export_period.html" %}
+  </section>
+
+  <div class="export-dialog__footer">
+    <p class="export-dialog__hint">스튜디오 · 예약자 · 대여 목적</p>
+    <div class="export-dialog__downloads">
+      <button type="button" data-download-path="export" class="js-download-button button button--excel">
+        <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12m-4-4 4 4 4-4M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
+        </svg>
+        <span>엑셀 다운로드</span>
+      </button>
+      <button type="button" data-download-path="export/txt" class="js-download-button button button--txt">
+        <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12m-4-4 4 4 4-4M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
+        </svg>
+        <span>TXT 다운로드</span>
+      </button>
+    </div>
+  </div>
+</dialog>

@@ -10,40 +10,22 @@
     </div>
 
     <div class="site-header__controls">
-      <div class="site-header__toolbar glass-surface">
-        <label class="month-picker-field" for="month-picker">
-          <span class="month-picker-field__label">내보낼 월</span>
-          <input
-            type="month"
-            id="month-picker"
-            value="{{ today_ym }}"
-            class="month-picker"
-          />
-        </label>
-        <div class="site-header__downloads">
-          <button
-            type="button"
-            data-download-path="export"
-            aria-label="엑셀 다운로드"
-            title="선택한 월의 예약 내역을 엑셀로 다운로드"
-            class="js-download-button button button--excel">
-            <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 3v12m-4-4 4 4 4-4M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
-            </svg>
-            <span>엑셀</span>
-          </button>
-          <button
-            type="button"
-            data-download-path="export/txt"
-            aria-label="TXT 다운로드"
-            title="선택한 월의 예약 내역을 TXT로 다운로드"
-            class="js-download-button button button--txt">
-            <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 3v12m-4-4 4 4 4-4M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
-            </svg>
-            <span>TXT</span>
-          </button>
-        </div>
+      <div class="tooltip-trigger">
+        <button
+          type="button"
+          id="open-export-dialog"
+          class="button button--export"
+          aria-haspopup="dialog"
+          aria-controls="export-dialog"
+          aria-describedby="export-tooltip">
+          <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3v12m-4-4 4 4 4-4M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
+          </svg>
+          <span>엑셀·TXT 추출하기</span>
+        </button>
+        <span id="export-tooltip" class="tooltip" role="tooltip">
+          선택한 월 또는 일 단위 기간의 예약완료 내역을 엑셀·TXT로 다운로드합니다.
+        </span>
       </div>
 
       <div class="site-header__actions">

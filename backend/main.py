@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import requests as http_client
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from calendar import monthrange
 from pathlib import Path
 from urllib.parse import quote
 import io
@@ -30,8 +31,8 @@ STUDIO_SUMMARY_LABELS = [
 ]
 
 
-def _studio_summary(day_data: dict[int, list]) -> tuple[int, dict[str, int]]:
-    """월 예약 전체 건수와 출력용 스튜디오 유형별 건수를 반환한다."""
+def _studio_summary(day_data: dict[date, list]) -> tuple[int, dict[str, int]]:
+    """선택 기간의 예약 건수와 스튜디오 유형별 건수를 반환한다."""
     counts = {label: 0 for label in STUDIO_SUMMARY_LABELS}
     total = 0
 
@@ -109,16 +110,48 @@ async def toggle_checkin(request: Request, rr_seq: str):
     )
 
 
-def _fetch_month(y: int, m: int) -> dict[int, list]:
-    """해당 월의 모든 날 병렬 조회 → {day: [items]} (예약 있는 날만)"""
-    import calendar
+def _resolve_export_period(
+    year: int | None,
+    month: int | None,
+    start_date: date | None,
+    end_date: date | None,
+) -> tuple[date, date, bool]:
+    """월 전체 또는 양 끝 날짜를 포함하는 지정 기간을 검증한다."""
+    if start_date is not None or end_date is not None:
+        if start_date is None or end_date is None:
+            raise HTTPException(status_code=400, detail="시작일과 종료일을 모두 지정해 주세요.")
+        if start_date > end_date:
+            raise HTTPException(status_code=400, detail="종료일은 시작일과 같거나 이후여야 합니다.")
+        return start_date, end_date, True
+
+    today = date.today()
+    y = today.year if year is None else year
+    m = today.month if month is None else month
+    try:
+        start = date(y, m, 1)
+        end = date(y, m, monthrange(y, m)[1])
+    except ValueError:
+        raise HTTPException(status_code=400, detail="올바른 연도와 월을 지정해 주세요.")
+    return start, end, False
+
+
+def _export_period_labels(start: date, end: date, is_range: bool) -> tuple[str, str]:
+    if is_range:
+        return (
+            f"{start:%Y.%m.%d} ~ {end:%Y.%m.%d}",
+            f"{start.isoformat()}_{end.isoformat()}",
+        )
+    return f"{start.year}년 {start.month}월", f"{start.year}년{start.month:02d}월"
+
+
+def _fetch_period(start: date, end: date) -> dict[date, list]:
+    """지정 기간을 병렬 조회해 예약완료 내역을 날짜별로 반환한다."""
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
-    _, last_day = calendar.monthrange(y, m)
-    day_strs = [f"{y:04d}-{m:02d}-{day:02d}" for day in range(1, last_day + 1)]
-    day_data: dict[int, list] = {}
+    days = [start + timedelta(days=offset) for offset in range((end - start).days + 1)]
+    day_data: dict[date, list] = {}
     with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = {executor.submit(_fetch, d): int(d.split("-")[2]) for d in day_strs}
+        futures = {executor.submit(_fetch, d.isoformat()): d for d in days}
         for future in as_completed(futures):
             day = futures[future]
             items = future.result()
@@ -133,7 +166,14 @@ def _fetch_month(y: int, m: int) -> dict[int, list]:
 
 
 @app.get("/export")
-async def export_excel(year: int | None = None, month: int | None = None):
+def export_excel(
+    year: int | None = None,
+    month: int | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+):
+    start, end, is_range = _resolve_export_period(year, month, start_date, end_date)
+    period_label, filename_label = _export_period_labels(start, end, is_range)
     try:
         import openpyxl
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
@@ -141,18 +181,11 @@ async def export_excel(year: int | None = None, month: int | None = None):
         from fastapi.responses import JSONResponse
         return JSONResponse({"error": "openpyxl not installed"}, status_code=500)
 
-    import calendar
-
-    today = date.today()
-    y = year or today.year
-    m = month or today.month
-    _, last_day = calendar.monthrange(y, m)
-
-    day_data = _fetch_month(y, m)
+    day_data = _fetch_period(start, end)
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = f"{y}년 {m}월"
+    ws.title = f"{start:%Y.%m.%d}~{end:%Y.%m.%d}" if is_range else period_label
 
     ws.column_dimensions["A"].width = 22
     ws.column_dimensions["B"].width = 14
@@ -167,12 +200,8 @@ async def export_excel(year: int | None = None, month: int | None = None):
 
     cur = 1
 
-    for day in range(1, last_day + 1):
-        if day not in day_data:
-            continue
-
-        d   = date(y, m, day)
-        lbl = f"{y}년 {m}월 {day}일 ({WEEKDAY_KO[d.weekday()]})"
+    for d in sorted(day_data):
+        lbl = f"{d.year}년 {d.month}월 {d.day}일 ({WEEKDAY_KO[d.weekday()]})"
 
         # 날짜 헤더
         ws.merge_cells(f"A{cur}:C{cur}")
@@ -193,7 +222,7 @@ async def export_excel(year: int | None = None, month: int | None = None):
         cur += 1
 
         # 데이터 행
-        for item in day_data[day]:
+        for item in day_data[d]:
             aligns = ["left", "center", "left"]
             for col, (val, align) in enumerate(zip(
                 [item.get("rpName", ""), item.get("rrBooker", ""), item.get("rrPurpose", "")],
@@ -207,13 +236,14 @@ async def export_excel(year: int | None = None, month: int | None = None):
         cur += 1  # 날짜 사이 빈 행
 
     if cur == 1:
-        ws.cell(row=1, column=1, value=f"{y}년 {m}월 예약 내역 없음")
+        ws.cell(row=1, column=1, value=f"{period_label} 예약 내역 없음")
         cur = 3
 
-    # 월별 스튜디오·기자재 대여 요약
+    # 선택 기간의 스튜디오·기자재 대여 요약
     total, summary_counts = _studio_summary(day_data)
     ws.merge_cells(start_row=cur, start_column=1, end_row=cur, end_column=3)
-    cell = ws.cell(row=cur, column=1, value=f"• {m}월 스튜디오·기자재 대여 요약(총 {total}건)")
+    summary_label = period_label if is_range else f"{start.month}월"
+    cell = ws.cell(row=cur, column=1, value=f"• {summary_label} 스튜디오·기자재 대여 요약(총 {total}건)")
     cell.font = Font(bold=True, size=11)
     cell.alignment = Alignment(horizontal="left", vertical="center")
     cur += 1
@@ -228,7 +258,7 @@ async def export_excel(year: int | None = None, month: int | None = None):
     wb.save(buf)
     buf.seek(0)
 
-    filename = f"CDE스튜디오_{y}년{m:02d}월.xlsx"
+    filename = f"CDE스튜디오_{filename_label}.xlsx"
     return StreamingResponse(
         buf,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -237,29 +267,25 @@ async def export_excel(year: int | None = None, month: int | None = None):
 
 
 @app.get("/export/txt")
-async def export_txt(year: int | None = None, month: int | None = None):
-    import calendar
+def export_txt(
+    year: int | None = None,
+    month: int | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+):
+    start, end, is_range = _resolve_export_period(year, month, start_date, end_date)
+    period_label, filename_label = _export_period_labels(start, end, is_range)
+    day_data = _fetch_period(start, end)
 
-    today = date.today()
-    y = year or today.year
-    m = month or today.month
-    _, last_day = calendar.monthrange(y, m)
+    lines: list[str] = [f"■ {period_label} CDE 스튜디오 예약 현황\n"]
 
-    day_data = _fetch_month(y, m)
-
-    lines: list[str] = [f"■ {y}년 {m}월 CDE 스튜디오 예약 현황\n"]
-
-    for day in range(1, last_day + 1):
-        if day not in day_data:
-            continue
-
-        d   = date(y, m, day)
-        lbl = f"{y}년 {m}월 {day}일 ({WEEKDAY_KO[d.weekday()]})"
+    for d in sorted(day_data):
+        lbl = f"{d.year}년 {d.month}월 {d.day}일 ({WEEKDAY_KO[d.weekday()]})"
         lines.append(f"{'─' * 40}")
         lines.append(lbl)
         lines.append(f"{'─' * 40}")
 
-        for item in day_data[day]:
+        for item in day_data[d]:
             studio  = item.get("rpName",    "")
             booker  = item.get("rrBooker",  "")
             purpose = item.get("rrPurpose", "")
@@ -267,10 +293,13 @@ async def export_txt(year: int | None = None, month: int | None = None):
 
         lines.append("")
 
+    if not day_data:
+        lines.append("예약 내역 없음")
+
     content = "\n".join(lines)
     buf = io.BytesIO(content.encode("utf-8-sig"))  # BOM 포함 → 메모장 한글 깨짐 방지
 
-    filename = f"CDE스튜디오_{y}년{m:02d}월.txt"
+    filename = f"CDE스튜디오_{filename_label}.txt"
     return StreamingResponse(
         buf,
         media_type="text/plain; charset=utf-8",

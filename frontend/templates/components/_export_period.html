@@ -1,0 +1,25 @@
+<div class="export-period" id="export-period">
+  <div class="export-period__mode">
+    <label class="month-picker-field" id="export-month-field" for="month-picker">
+      <span class="month-picker-field__label">내보낼 월</span>
+      <input type="month" id="month-picker" value="{{ today_ym }}" class="month-picker" required />
+    </label>
+    <label class="export-period__toggle" for="export-range-toggle">
+      <input type="checkbox" id="export-range-toggle" aria-controls="export-date-range" />
+      <span>기간 지정</span>
+    </label>
+  </div>
+
+  <div class="export-period__range" id="export-date-range" hidden>
+    <label class="export-period__date-field" for="export-start-date">
+      <span>시작일</span>
+      <input type="date" id="export-start-date" class="export-period__date" disabled />
+    </label>
+    <span class="export-period__separator" aria-hidden="true">~</span>
+    <label class="export-period__date-field" for="export-end-date">
+      <span>종료일</span>
+      <input type="date" id="export-end-date" class="export-period__date" disabled />
+    </label>
+    <output id="export-period-preview" class="export-period__preview" aria-live="polite"></output>
+  </div>
+</div>

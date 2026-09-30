@@ -25,6 +25,13 @@
 .button:active { transform: scale(0.97); }
 .button:focus-visible { outline: 3px solid rgb(0 122 255 / 0.55); outline-offset: 3px; }
 .button--refresh { color: #3a506f; }
+.button--export {
+  min-height: 2.5rem;
+  color: #245788;
+  background: linear-gradient(160deg, #eef6ff, #dceafb);
+  border-color: #bdcee6;
+}
+.button--export:hover { background: linear-gradient(160deg, #e2efff, #ccdef5); }
 .button--refresh::before { content: "↻"; font-size: 1rem; }
 
 .button--excel, .button--txt {
