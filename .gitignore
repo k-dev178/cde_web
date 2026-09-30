@@ -1,1 +1,7 @@
-./claude/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local editor and AI assistant settings
+.vscode/
+.claude/
