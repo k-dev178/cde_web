@@ -2,26 +2,81 @@
 
 CDE 스튜디오 예약 현황을 보여주는 웹 앱입니다.
 
-## 설치
+## 실행 전 준비
 
-```bash
-pip install -r requirements.txt
+개발 및 실행 환경은 **Python 3.12.14**로 맞춥니다.
+
+> 1단계
+
+```powershell
+py -m pip install --upgrade uv
+```
+Python 버전과 가상환경을 관리하는 **uv를 설치하거나 업데이트**합니다.
+
+> 2단계
+
+```powershell
+py -m uv venv --python 3.12.14 --seed .venv
+```
+**Python 3.12.14로 `.venv` 가상환경을 생성**합니다. 해당 버전이 없으면 다운로드하고, `--seed`로 pip도 설치합니다.
+
+> 3단계
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+현재 PowerShell에서 **가상환경을 활성화**합니다. 이후 `python` 명령은 이 환경의 Python을 사용합니다.
+
+> 4단계
+
+```powershell
+python --version
+```
+사용 중인 Python 버전을 확인합니다. **Python 3.12.14**가 출력되어야 합니다.
+
+> 5단계
+
+```powershell
+python -m pip install -r requirements.txt
+```
+프로젝트에 필요한 패키지를 **활성화된 가상환경에 설치**합니다.
+
+> 종합
+
+```powershell
+py -m pip install --upgrade uv
+py -m uv venv --python 3.12.14 --seed .venv
+.\.venv\Scripts\Activate.ps1
+
+python --version
+
+python -m pip install -r requirements.txt
 ```
 
-> 여러 Python 환경이 있는 경우, 실행할 Python의 pip로 설치해야 합니다.
-> ```bash
-> python -m pip install -r requirements.txt
-> ```
 
 ## 실행
 
-```bash
+가상환경이 활성화된 터미널에서 실행합니다. 새 터미널을 열었다면 프로젝트 폴더에서 3단계의 활성화 명령을 다시 실행합니다.
+
+> 6단계
+
+```powershell
 python -m uvicorn main:app --reload --port 8000
 ```
+**웹 서버를 실행**합니다. `main:app`은 `main.py`의 FastAPI 앱을 지정하고, `--reload`는 코드 변경 시 서버를 자동으로 재시작하며, `--port 8000`은 접속 포트를 지정합니다.
 
-> `uvicorn` 단독 명령 대신 `python -m uvicorn`을 쓰면 현재 Python 환경에 설치된 패키지를 정확히 사용합니다.
+> 7단계
 
-브라우저에서 `http://localhost:8000` 접속
+브라우저에서 `http://localhost:8000`에 접속해 **예약 현황 화면을 확인**합니다.
+
+> 종료
+
+서버가 실행 중인 터미널에서 `Ctrl+C`를 눌러 **서버를 종료**합니다.
+
+```powershell
+deactivate
+```
+**가상환경을 비활성화**합니다. `.venv` 폴더와 설치된 패키지는 유지됩니다.
 
 ## 기능
 
