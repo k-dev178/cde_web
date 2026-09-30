@@ -1,0 +1,42 @@
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="site-header__top">
+      <div>
+        <h1 class="site-header__title">CDE 스튜디오 대여 현황</h1>
+        <p class="site-header__date">{{ date_label }}</p>
+      </div>
+      <div class="site-header__actions">
+        <span id="spinner" class="htmx-indicator loading-indicator">로딩 중…</span>
+        <button
+          hx-get="/table"
+          hx-target="#table-container"
+          hx-swap="innerHTML"
+          hx-indicator="#spinner"
+          class="button button--refresh">
+          새로고침
+        </button>
+      </div>
+    </div>
+
+    <div class="site-header__toolbar">
+      <input
+        type="month"
+        id="month-picker"
+        value="{{ today_ym }}"
+        class="month-picker"
+      />
+      <button
+        type="button"
+        data-download-path="export"
+        class="js-download-button button button--excel">
+        엑셀
+      </button>
+      <button
+        type="button"
+        data-download-path="export/txt"
+        class="js-download-button button button--txt">
+        TXT
+      </button>
+    </div>
+  </div>
+</header>

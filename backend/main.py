@@ -1,13 +1,19 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import requests as http_client
 from datetime import date, datetime
+from pathlib import Path
 from urllib.parse import quote
 import io
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = PROJECT_ROOT / "frontend"
+
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR / "static")), name="static")
+templates = Jinja2Templates(directory=str(FRONTEND_DIR / "templates"))
 
 checkin_set: set[str] = set()
 
@@ -83,7 +89,11 @@ async def index(request: Request):
 
 @app.get("/table", response_class=HTMLResponse)
 async def table_partial(request: Request):
-    return templates.TemplateResponse(request=request, name="_table.html", context=_build_context())
+    return templates.TemplateResponse(
+        request=request,
+        name="components/reservations/_table.html",
+        context=_build_context(),
+    )
 
 
 @app.post("/checkin/{rr_seq}", response_class=HTMLResponse)
@@ -92,7 +102,11 @@ async def toggle_checkin(request: Request, rr_seq: str):
         checkin_set.discard(rr_seq)
     else:
         checkin_set.add(rr_seq)
-    return templates.TemplateResponse(request=request, name="_table.html", context=_build_context())
+    return templates.TemplateResponse(
+        request=request,
+        name="components/reservations/_table.html",
+        context=_build_context(),
+    )
 
 
 def _fetch_month(y: int, m: int) -> dict[int, list]:

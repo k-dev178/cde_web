@@ -1,0 +1,12 @@
+<main class="reservation-main">
+  <section class="reservation-panel" aria-label="오늘의 예약 목록">
+    <div
+      id="table-container"
+      hx-get="/table"
+      hx-trigger="every 30s"
+      hx-swap="innerHTML"
+      hx-indicator="#spinner">
+      {% include "components/reservations/_table.html" %}
+    </div>
+  </section>
+</main>

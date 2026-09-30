@@ -1,0 +1,17 @@
+{% include "components/reservations/_status_bar.html" %}
+
+{% if error %}
+  <div class="reservation-empty-state">
+    네트워크 오류 — 데이터를 불러올 수 없습니다.
+  </div>
+{% elif not items %}
+  <div class="reservation-empty-state">
+    오늘 예약된 내역이 없습니다.
+  </div>
+{% else %}
+  {% include "components/reservations/_mobile_cards.html" %}
+  {% include "components/reservations/_desktop_table.html" %}
+{% endif %}
+
+<script id="reservation-data" type="application/json">{{ items | tojson }}</script>
+<script id="checkin-data" type="application/json">{{ checkin_list | tojson }}</script>

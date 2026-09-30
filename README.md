@@ -2,6 +2,39 @@
 
 CDE 스튜디오 예약 현황을 보여주는 웹 앱입니다.
 
+## 프로젝트 구조
+
+```text
+cde_web/
+├── backend/
+│   ├── __init__.py
+│   └── main.py
+├── frontend/
+│   ├── templates/
+│   │   ├── base.html
+│   │   ├── index.html
+│   │   └── components/
+│   │       ├── _header.html
+│   │       ├── _reservation_panel.html
+│   │       └── reservations/
+│   └── static/
+│       ├── css/
+│       │   ├── base.css
+│       │   └── components/
+│       └── js/
+│           ├── app.js
+│           ├── components/
+│           └── features/
+├── run.py
+├── requirements.txt
+└── README.md
+```
+
+- `backend`: FastAPI 라우팅, 외부 예약 데이터 조회, 파일 내보내기
+- `frontend/templates`: 페이지 레이아웃과 화면 컴포넌트
+- `frontend/static/css`: 기본 스타일과 컴포넌트별 스타일
+- `frontend/static/js`: 진입점, 공용 컴포넌트, 기능별 모듈
+
 ## 실행 전 준비
 
 개발 및 실행 환경은 **Python 3.12.14**로 맞춥니다.
@@ -61,9 +94,9 @@ python -m pip install -r requirements.txt
 > 6단계
 
 ```powershell
-python -m uvicorn main:app --reload --port 8000
+python -m uvicorn backend.main:app --reload --port 8000
 ```
-**웹 서버를 실행**합니다. `main:app`은 `main.py`의 FastAPI 앱을 지정하고, `--reload`는 코드 변경 시 서버를 자동으로 재시작하며, `--port 8000`은 접속 포트를 지정합니다.
+**웹 서버를 실행**합니다. `backend.main:app`은 `backend/main.py`의 FastAPI 앱을 지정하고, `--reload`는 코드 변경 시 서버를 자동으로 재시작하며, `--port 8000`은 접속 포트를 지정합니다.
 
 > 7단계
 

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}CDE 스튜디오 대여 현황{% endblock %}</title>
+
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', path='css/base.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/layout.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/buttons.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/header.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/htmx.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/month-picker.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/reservation-panel.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/status-bar.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/reservation-card.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/reservation-table.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/components/toast.css') }}" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% block content %}{% endblock %}
+  <script type="module" src="{{ url_for('static', path='js/app.js') }}"></script>
+</body>
+</html>

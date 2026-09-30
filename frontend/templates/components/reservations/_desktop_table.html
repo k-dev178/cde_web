@@ -1,0 +1,51 @@
+<div class="reservation-table-wrapper">
+  <table class="reservation-table">
+    <thead>
+      <tr>
+        <th class="reservation-table__studio">스튜디오</th>
+        <th>시간</th>
+        <th>예약자</th>
+        <th class="reservation-table__purpose">목적</th>
+        <th>상태</th>
+        <th>입실</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        {% set state = item.rrState %}
+        {% set rr_seq = item.rrSeq | string %}
+        {% set checked_in = rr_seq in checkin_set %}
+        <tr class="reservation-table__row
+          {% if state == '예약완료' %}reservation-table__row--confirmed
+          {% elif state == '취소' %}reservation-table__row--cancelled
+          {% elif state == '반려' %}reservation-table__row--rejected{% endif %}">
+          <td class="reservation-table__studio-name">{{ item.rpName }}</td>
+          <td class="reservation-table__time">
+            {{ item.rrStartTime }} ~ {{ item.rrEndTime }}
+          </td>
+          <td class="reservation-table__booker">{{ item.rrBooker }}</td>
+          <td class="reservation-table__purpose-value">{{ item.rrPurpose }}</td>
+          <td class="reservation-table__status">
+            <span class="status-badge
+              {% if state == '예약완료' %}status-badge--confirmed
+              {% elif state == '취소' %}status-badge--cancelled
+              {% elif state == '반려' %}status-badge--rejected
+              {% else %}status-badge--default{% endif %}">
+              {{ state }}
+            </span>
+          </td>
+          <td class="reservation-table__checkin">
+            <button
+              hx-post="/checkin/{{ rr_seq }}"
+              hx-target="#table-container"
+              hx-swap="innerHTML"
+              hx-indicator="#spinner"
+              class="button button--checkin {% if checked_in %}button--checked{% else %}button--primary{% endif %}">
+              {% if checked_in %}입실완료{% else %}입실{% endif %}
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

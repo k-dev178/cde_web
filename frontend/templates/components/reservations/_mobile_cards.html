@@ -1,0 +1,34 @@
+<div class="reservation-cards">
+  {% for item in items %}
+    {% set state = item.rrState %}
+    {% set rr_seq = item.rrSeq | string %}
+    {% set checked_in = rr_seq in checkin_set %}
+    <article class="reservation-card
+      {% if state == '예약완료' %}reservation-card--confirmed
+      {% elif state == '취소' %}reservation-card--cancelled
+      {% elif state == '반려' %}reservation-card--rejected{% endif %}">
+      <div class="reservation-card__heading">
+        <span class="reservation-card__studio">{{ item.rpName }}</span>
+        <span class="status-badge
+          {% if state == '예약완료' %}status-badge--confirmed
+          {% elif state == '취소' %}status-badge--cancelled
+          {% elif state == '반려' %}status-badge--rejected
+          {% else %}status-badge--default{% endif %}">
+          {{ state }}
+        </span>
+      </div>
+      <p class="reservation-card__time">{{ item.rrStartTime }} ~ {{ item.rrEndTime }}</p>
+      <p class="reservation-card__details">{{ item.rrBooker }} · {{ item.rrPurpose }}</p>
+      <div class="reservation-card__actions">
+        <button
+          hx-post="/checkin/{{ rr_seq }}"
+          hx-target="#table-container"
+          hx-swap="innerHTML"
+          hx-indicator="#spinner"
+          class="button button--checkin {% if checked_in %}button--checked{% else %}button--primary{% endif %}">
+          {% if checked_in %}입실완료{% else %}입실{% endif %}
+        </button>
+      </div>
+    </article>
+  {% endfor %}
+</div>

@@ -39,7 +39,7 @@ def main():
     print(f"서버를 시작합니다 (포트 {PORT})...")
 
     proc = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "main:app", "--port", str(PORT)],
+        [sys.executable, "-m", "uvicorn", "backend.main:app", "--port", str(PORT)],
         cwd=HERE,
     )
 
