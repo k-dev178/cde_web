@@ -24,14 +24,24 @@
           <button
             type="button"
             data-download-path="export"
+            aria-label="엑셀 다운로드"
+            title="선택한 월의 예약 내역을 엑셀로 다운로드"
             class="js-download-button button button--excel">
-            엑셀
+            <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12m-4-4 4 4 4-4M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
+            </svg>
+            <span>엑셀</span>
           </button>
           <button
             type="button"
             data-download-path="export/txt"
+            aria-label="TXT 다운로드"
+            title="선택한 월의 예약 내역을 TXT로 다운로드"
             class="js-download-button button button--txt">
-            TXT
+            <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12m-4-4 4 4 4-4M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />
+            </svg>
+            <span>TXT</span>
           </button>
         </div>
       </div>
