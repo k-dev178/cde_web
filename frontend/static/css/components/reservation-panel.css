@@ -1,15 +1,20 @@
 .reservation-panel {
   overflow: hidden;
-  background: #fff;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06);
+  border-radius: 2rem;
+  --glass-fill: rgb(255 255 255 / 0.62);
 }
 
 .reservation-empty-state {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5rem 1rem;
-  color: #94a3b8;
+  min-height: 16rem;
+  padding: 3rem 1.5rem;
+  color: var(--muted);
   font-size: 0.875rem;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .reservation-panel { border-radius: 1.5rem; }
 }

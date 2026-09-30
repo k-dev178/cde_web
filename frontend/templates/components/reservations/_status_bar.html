@@ -1,7 +1,16 @@
 <div class="reservation-status-bar">
-  <span>
-    총 <strong class="reservation-status-bar__total">{{ total }}</strong>건
-    (예약완료 <strong class="reservation-status-bar__confirmed">{{ confirmed }}</strong>건)
+  <div class="reservation-status-bar__summary">
+    <span class="reservation-status-bar__label">오늘 예약</span>
+    <strong class="reservation-status-bar__total">{{ total }}</strong>
+    <span class="reservation-status-bar__unit">건</span>
+    <span class="reservation-status-bar__divider" aria-hidden="true"></span>
+    <span class="reservation-status-bar__confirmed">
+      <span class="reservation-status-bar__confirmed-dot" aria-hidden="true"></span>
+      예약완료 {{ confirmed }}건
+    </span>
+  </div>
+  <span class="reservation-status-bar__updated">
+    <span class="reservation-status-bar__live-dot" aria-hidden="true"></span>
+    {{ updated_at }} 기준
   </span>
-  <span>{{ updated_at }} 업데이트</span>
 </div>

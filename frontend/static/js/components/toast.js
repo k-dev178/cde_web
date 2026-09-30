@@ -5,7 +5,7 @@ export function showToast(title, body, variant = "warning") {
   if (!container) return;
 
   const toast = document.createElement("div");
-  toast.className = `toast toast--${variant}`;
+  toast.className = `toast glass-surface toast--${variant}`;
 
   const titleElement = document.createElement("p");
   titleElement.className = "toast__title";

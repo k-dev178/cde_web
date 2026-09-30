@@ -1,65 +1,38 @@
-.reservation-cards {
-  display: block;
-}
-
+.reservation-cards { display: grid; gap: 0.75rem; padding: 1rem; }
 .reservation-card {
-  padding: 0.75rem 1rem;
-  background: #fff;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 1.1rem;
+  background: rgb(255 255 255 / 0.48);
+  border: 1px solid rgb(255 255 255 / 0.8);
+  border-radius: 1.25rem;
+  box-shadow: 0 3px 12px -9px rgb(45 60 85 / 0.3);
 }
-
-.reservation-card--confirmed { background: #f0fdf4; }
-.reservation-card--cancelled { background: #fef2f2; }
-.reservation-card--rejected { background: #fff7ed; }
-
-.reservation-card__heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 0.25rem;
-  gap: 0.5rem;
-}
-
-.reservation-card__studio {
-  color: #1e293b;
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.375;
-}
-
-.reservation-card__time,
-.reservation-card__details {
-  margin-bottom: 0.25rem;
-  color: #64748b;
-  font-size: 0.75rem;
-}
-
-.reservation-card__details {
-  overflow: hidden;
-  color: #475569;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.reservation-card__actions {
-  margin-top: 0.625rem;
-}
+.reservation-card--cancelled { background: rgb(255 236 236 / 0.5); }
+.reservation-card--rejected { background: rgb(255 242 226 / 0.5); }
+.reservation-card__heading { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.6rem; gap: 0.6rem; }
+.reservation-card__studio { color: #303541; font-size: 0.875rem; font-weight: 600; line-height: 1.5; word-break: keep-all; }
+.reservation-card__time, .reservation-card__details { margin-bottom: 0.4rem; color: var(--muted); font-size: 0.8125rem; line-height: 1.6; }
+.reservation-card__time { font-variant-numeric: tabular-nums; }
+.reservation-card__details { word-break: keep-all; overflow-wrap: anywhere; }
+.reservation-card__actions { display: flex; justify-content: flex-end; margin-top: 0.75rem; }
 
 .status-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
-  padding: 0.125rem 0.625rem;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: 9999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid rgb(255 255 255 / 0.6);
+  border-radius: 999px;
 }
+.status-badge--confirmed { color: #26704f; background: rgb(70 160 111 / 0.1); }
+.status-badge--cancelled { color: #ae4b55; background: rgb(210 80 94 / 0.09); }
+.status-badge--rejected { color: #986626; background: rgb(205 149 67 / 0.12); }
+.status-badge--default { color: #67707f; background: rgb(100 112 133 / 0.08); }
 
-.status-badge--confirmed { background: #16a34a; }
-.status-badge--cancelled { background: #ef4444; }
-.status-badge--rejected { background: #f97316; }
-.status-badge--default { background: #94a3b8; }
-
-@media (min-width: 640px) {
-  .reservation-cards { display: none; }
+@media (min-width: 900px) { .reservation-cards { display: none; } }
+@media (min-width: 580px) and (max-width: 899px) {
+  .reservation-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

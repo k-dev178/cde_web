@@ -1,5 +1,9 @@
 .reservation-main {
-  max-width: 64rem;
-  margin: 1rem auto 0;
-  padding: 0 0.75rem 2.5rem;
+  max-width: 76rem;
+  margin: 1.25rem auto 0;
+  padding: 0 1.5rem 4rem;
+}
+
+@media (max-width: 640px) {
+  .reservation-main { margin-top: 1rem; padding-inline: 0.875rem; }
 }
