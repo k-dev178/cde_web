@@ -1,4 +1,7 @@
 .venv/
+.venv.backup-*/
+.tools/
+.tmp-bootstrap-*/
 __pycache__/
 *.py[cod]
 

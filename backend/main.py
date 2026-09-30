@@ -88,6 +88,11 @@ async def index(request: Request):
     return templates.TemplateResponse(request=request, name="index.html", context=_build_context())
 
 
+@app.get("/health", include_in_schema=False)
+def health():
+    return {"app": "cde-studio", "status": "ok"}
+
+
 @app.get("/table", response_class=HTMLResponse)
 async def table_partial(request: Request):
     return templates.TemplateResponse(
