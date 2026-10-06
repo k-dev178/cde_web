@@ -3,28 +3,39 @@ set -Eeuo pipefail
 
 # =========================================================
 # Rocky Linux FastAPI 원클릭 배포
+# - git clone 이후 프로젝트 폴더에서 실행
 # =========================================================
 
 if [[ $EUID -ne 0 ]]; then
     echo "root에서 실행하세요."
-    echo "sudo ./setup-web.sh"
+    echo "sudo ./runinrocky.sh"
     exit 1
 fi
 
-DEFAULT_GIT="https://github.com/k-dev178/cde_web.git"
 DEFAULT_PORT="8000"
 DEFAULT_DOMAIN="jjcde.duckdns.org"
+
 PYTHON_VERSION="3.12.14"
 APP_MODULE="backend.main:app"
 APP_USER="webapp"
+
+# 이 스크립트가 위치한 프로젝트 폴더
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_NAME="$(basename "$APP_DIR")"
+SERVICE_NAME="$REPO_NAME"
 
 echo "========================================="
 echo " Rocky Linux FastAPI 원클릭 배포"
 echo "========================================="
 echo
 
-read -rp "Git 주소 [$DEFAULT_GIT]: " GIT_URL
-GIT_URL="${GIT_URL:-$DEFAULT_GIT}"
+echo "프로젝트 위치:"
+echo "$APP_DIR"
+echo
+
+# =========================================================
+# 사용자 입력
+# =========================================================
 
 read -rp "FastAPI 내부 포트 [$DEFAULT_PORT]: " APP_PORT
 APP_PORT="${APP_PORT:-$DEFAULT_PORT}"
@@ -36,25 +47,22 @@ DOMAIN="${DOMAIN#http://}"
 DOMAIN="${DOMAIN#https://}"
 DOMAIN="${DOMAIN%/}"
 
-REPO_NAME="$(basename "${GIT_URL%.git}")"
-APP_DIR="/opt/$REPO_NAME"
-SERVICE_NAME="$REPO_NAME"
-
 echo
-echo "Git       : $GIT_URL"
+echo "========================================="
 echo "설치 위치 : $APP_DIR"
+echo "서비스명  : $SERVICE_NAME"
 echo "포트      : $APP_PORT"
 echo "도메인    : $DOMAIN"
+echo "========================================="
 echo
 
 # =========================================================
-# 기본 패키지
+# 1. 필요한 패키지
 # =========================================================
 
 echo "=== 1. 필수 패키지 설치 ==="
 
 dnf install -y \
-    git \
     curl \
     ca-certificates \
     openssh-server \
@@ -63,9 +71,10 @@ dnf install -y \
     policycoreutils
 
 # =========================================================
-# SSH / Firewall
+# 2. SSH / Firewall
 # =========================================================
 
+echo
 echo "=== 2. SSH / 방화벽 설정 ==="
 
 systemctl enable --now sshd
@@ -76,23 +85,27 @@ firewall-cmd --permanent --add-port=80/tcp
 firewall-cmd --reload
 
 # =========================================================
-# uv 설치
+# 3. uv
 # =========================================================
 
+echo
 echo "=== 3. uv 설치 ==="
 
 if [[ ! -x /usr/local/bin/uv ]]; then
     curl -LsSf https://astral.sh/uv/install.sh | \
-        env UV_INSTALL_DIR=/usr/local/bin UV_NO_MODIFY_PATH=1 sh
+        env \
+        UV_INSTALL_DIR=/usr/local/bin \
+        UV_NO_MODIFY_PATH=1 \
+        sh
 fi
 
 /usr/local/bin/uv --version
 
 # =========================================================
-# Python 설치
-# /root 밑에 설치하지 않고 /opt 사용
+# 4. Python
 # =========================================================
 
+echo
 echo "=== 4. Python $PYTHON_VERSION 설치 ==="
 
 mkdir -p /opt/uv-python
@@ -104,10 +117,11 @@ export UV_PYTHON_INSTALL_DIR="/opt/uv-python"
 chmod -R a+rX /opt/uv-python
 
 # =========================================================
-# 프로젝트 사용자
+# 5. 서비스용 사용자
 # =========================================================
 
-echo "=== 5. 웹앱 사용자 설정 ==="
+echo
+echo "=== 5. 웹앱 사용자 준비 ==="
 
 if ! id "$APP_USER" &>/dev/null; then
     useradd \
@@ -117,40 +131,16 @@ if ! id "$APP_USER" &>/dev/null; then
 fi
 
 # =========================================================
-# Git clone / update
+# 6. 가상환경
 # =========================================================
 
-echo "=== 6. 프로젝트 다운로드 ==="
-
-if [[ -d "$APP_DIR/.git" ]]; then
-
-    echo "기존 프로젝트 발견"
-
-    chown -R "$APP_USER:$APP_USER" "$APP_DIR"
-
-    runuser -u "$APP_USER" -- \
-        git -C "$APP_DIR" pull --ff-only
-
-elif [[ -e "$APP_DIR" ]]; then
-
-    echo "$APP_DIR 가 이미 존재하지만 Git 저장소가 아닙니다."
-    exit 1
-
-else
-
-    git clone "$GIT_URL" "$APP_DIR"
-
-fi
-
-chown -R "$APP_USER:$APP_USER" "$APP_DIR"
-
-# =========================================================
-# 가상환경
-# =========================================================
-
-echo "=== 7. Python 가상환경 생성 ==="
+echo
+echo "=== 6. Python 가상환경 생성 ==="
 
 cd "$APP_DIR"
+
+# 기존 서비스가 있다면 먼저 중지
+systemctl stop "${SERVICE_NAME}.service" 2>/dev/null || true
 
 rm -rf .venv
 
@@ -161,25 +151,33 @@ UV_PYTHON_INSTALL_DIR="/opt/uv-python" \
     .venv
 
 # =========================================================
-# requirements.txt
+# 7. requirements
 # =========================================================
 
-echo "=== 8. Python 패키지 설치 ==="
+echo
+echo "=== 7. Python 패키지 설치 ==="
 
 ./.venv/bin/python \
     -m pip install \
     -r requirements.txt
 
-chown -R "$APP_USER:$APP_USER" "$APP_DIR"
-
 echo
+echo "Python:"
 ./.venv/bin/python --version
 
+echo
+echo "Uvicorn:"
+./.venv/bin/python -m uvicorn --version
+
+# webapp 사용자가 읽고 실행할 수 있게 설정
+chmod -R a+rX "$APP_DIR"
+
 # =========================================================
-# systemd
+# 8. systemd
 # =========================================================
 
-echo "=== 9. FastAPI 서비스 등록 ==="
+echo
+echo "=== 8. FastAPI 서비스 등록 ==="
 
 cat > "/etc/systemd/system/${SERVICE_NAME}.service" <<EOF
 [Unit]
@@ -209,18 +207,20 @@ systemctl enable "${SERVICE_NAME}.service"
 systemctl restart "${SERVICE_NAME}.service"
 
 # =========================================================
-# SELinux
+# 9. SELinux
 # =========================================================
 
-echo "=== 10. SELinux 설정 ==="
+echo
+echo "=== 9. SELinux 설정 ==="
 
 setsebool -P httpd_can_network_connect 1
 
 # =========================================================
-# Nginx
+# 10. Nginx
 # =========================================================
 
-echo "=== 11. Nginx 설정 ==="
+echo
+echo "=== 10. Nginx 설정 ==="
 
 cat > "/etc/nginx/conf.d/${SERVICE_NAME}.conf" <<EOF
 server {
@@ -248,10 +248,11 @@ systemctl enable --now nginx
 systemctl restart nginx
 
 # =========================================================
-# 서버 기동 대기
+# 11. 서버 확인
 # =========================================================
 
-echo "=== 12. 서버 확인 ==="
+echo
+echo "=== 11. FastAPI 서버 확인 ==="
 
 SUCCESS=0
 
@@ -266,7 +267,6 @@ for i in {1..15}; do
     fi
 
     sleep 1
-
 done
 
 echo
@@ -276,7 +276,7 @@ if [[ $SUCCESS -eq 1 ]]; then
 
     echo "설치 성공!"
     echo
-    echo "웹 주소:"
+    echo "웹:"
     echo "http://${DOMAIN}"
     echo
     echo "FastAPI:"
@@ -289,15 +289,16 @@ else
 
     echo "FastAPI 실행 실패"
     echo
-    echo "아래 명령으로 로그 확인:"
-    echo
+    echo "상태 확인:"
     echo "systemctl status ${SERVICE_NAME} --no-pager -l"
+    echo
+    echo "로그 확인:"
     echo "journalctl -u ${SERVICE_NAME} -n 100 --no-pager"
 
 fi
 
 echo
-echo "방화벽:"
+echo "열린 방화벽 포트:"
 firewall-cmd --list-ports
 
 echo
