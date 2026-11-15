@@ -7,25 +7,25 @@
 
   <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js" crossorigin="anonymous"></script>
 
-  <link rel="stylesheet" href="{{ url_for('static', path='css/base.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/glass.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/layout.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/buttons.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/header.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/htmx.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/month-picker.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/export-period.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/export-dialog.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/tooltip.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/reservation-panel.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/status-bar.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/reservation-card.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/reservation-table.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/components/toast.css') }}" />
+  <link rel="stylesheet" href="/static/css/base.css" />
+  <link rel="stylesheet" href="/static/css/components/glass.css" />
+  <link rel="stylesheet" href="/static/css/layout.css" />
+  <link rel="stylesheet" href="/static/css/components/buttons.css" />
+  <link rel="stylesheet" href="/static/css/components/header.css" />
+  <link rel="stylesheet" href="/static/css/components/htmx.css" />
+  <link rel="stylesheet" href="/static/css/components/month-picker.css" />
+  <link rel="stylesheet" href="/static/css/components/export-period.css" />
+  <link rel="stylesheet" href="/static/css/components/export-dialog.css" />
+  <link rel="stylesheet" href="/static/css/components/tooltip.css" />
+  <link rel="stylesheet" href="/static/css/components/reservation-panel.css" />
+  <link rel="stylesheet" href="/static/css/components/status-bar.css" />
+  <link rel="stylesheet" href="/static/css/components/reservation-card.css" />
+  <link rel="stylesheet" href="/static/css/components/reservation-table.css" />
+  <link rel="stylesheet" href="/static/css/components/toast.css" />
   {% block head %}{% endblock %}
 </head>
 <body>
   {% block content %}{% endblock %}
-  <script type="module" src="{{ url_for('static', path='js/app.js') }}"></script>
+  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>
