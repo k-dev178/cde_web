@@ -1,3 +1,5 @@
+**Railway 배포 주소** — [cdeweb-production.up.railway.app](https://cdeweb-production.up.railway.app/)
+
 # CDE 스튜디오 대여 현황
 
 스튜디오 예약 현황 조회, 입실 처리, 엑셀·TXT 내보내기를 제공하는 웹 앱입니다.
